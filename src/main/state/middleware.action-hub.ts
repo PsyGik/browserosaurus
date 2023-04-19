@@ -30,7 +30,6 @@ import { getAppIcons } from '../utils/get-app-icons'
 import { getInstalledAppNames } from '../utils/get-installed-app-names'
 import { initUpdateChecker } from '../utils/init-update-checker'
 import { openApp } from '../utils/open-app'
-import { removeWindowsFromMemory } from '../utils/remove-windows-from-memory'
 import {
   createWindows,
   pickerWindow,
@@ -124,7 +123,6 @@ export const actionHubMiddleware =
     // Update and restart
     else if (clickedUpdateRestartButton.match(action)) {
       autoUpdater.quitAndInstall()
-      removeWindowsFromMemory()
     }
 
     // Rescan for browsers
@@ -209,7 +207,6 @@ export const actionHubMiddleware =
       if (process.env.NODE_ENV === 'development') {
         prefsWindow?.hide()
       } else {
-        removeWindowsFromMemory()
         app.relaunch()
         app.exit()
       }

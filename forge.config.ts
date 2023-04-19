@@ -1,10 +1,8 @@
 import { MakerZIP } from '@electron-forge/maker-zip'
-import { WebpackPlugin } from '@electron-forge/plugin-webpack'
+import { VitePlugin } from '@electron-forge/plugin-vite'
 import type { ForgeConfig } from '@electron-forge/shared-types'
 
 import ForgeExternalsPlugin from './forge-externals-plugin'
-import { mainConfig } from './webpack.main.config'
-import { rendererConfig } from './webpack.renderer.config'
 
 const config: ForgeConfig = {
   makers: [new MakerZIP({}, ['darwin'])],
@@ -41,29 +39,49 @@ const config: ForgeConfig = {
     ],
   },
   plugins: [
-    new WebpackPlugin({
-      mainConfig,
-      renderer: {
-        config: rendererConfig,
-        entryPoints: [
-          {
-            html: './src/renderers/picker/index.html',
-            js: './src/renderers/picker/index.tsx',
-            name: 'picker_window',
-            preload: {
-              js: './src/renderers/shared/preload.ts',
-            },
-          },
-          {
-            html: './src/renderers/prefs/index.html',
-            js: './src/renderers/prefs/index.tsx',
-            name: 'prefs_window',
-            preload: {
-              js: './src/renderers/shared/preload.ts',
-            },
-          },
-        ],
-      },
+    new VitePlugin({
+      build: [
+        {
+          config: 'vite.main.config.ts',
+          entry: 'src/main/main.ts',
+        },
+        {
+          config: 'vite.preload.config.ts',
+          entry: 'src/renderers/shared/preload.ts',
+        },
+      ],
+      renderer: [
+        {
+          config: 'vite.renderer.config.ts',
+          name: 'picker_window',
+        },
+        {
+          config: 'vite.renderer.config.ts',
+          name: 'prefs_window',
+        },
+      ],
+      // mainConfig,
+      // renderer: {
+      //   config: rendererConfig,
+      //   entryPoints: [
+      //     {
+      //       html: './src/renderers/picker/index.html',
+      //       js: './src/renderers/picker/index.tsx',
+      //       name: 'picker_window',
+      //       preload: {
+      //         js: './src/renderers/shared/preload.ts',
+      //       },
+      //     },
+      //     {
+      //       html: './src/renderers/prefs/index.html',
+      //       js: './src/renderers/prefs/index.tsx',
+      //       name: 'prefs_window',
+      //       preload: {
+      //         js: './src/renderers/shared/preload.ts',
+      //       },
+      //     },
+      //   ],
+      // },
     }),
     new ForgeExternalsPlugin({
       externals: ['file-icon'],

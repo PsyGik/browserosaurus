@@ -8,10 +8,10 @@ import {
 } from './state/actions'
 import { dispatch } from './state/store'
 
-declare const PICKER_WINDOW_WEBPACK_ENTRY: string
-declare const PICKER_WINDOW_PRELOAD_WEBPACK_ENTRY: string
-declare const PREFS_WINDOW_WEBPACK_ENTRY: string
-declare const PREFS_WINDOW_PRELOAD_WEBPACK_ENTRY: string
+declare const PREFS_WINDOW_VITE_DEV_SERVER_URL: string
+declare const PICKER_WINDOW_VITE_DEV_SERVER_URL: string
+declare const PREFS_WINDOW_VITE_NAME: string
+declare const PICKER_WINDOW_VITE_NAME: string
 
 // Prevents garbage collection
 let pickerWindow: BrowserWindow | null | undefined
@@ -44,7 +44,7 @@ async function createWindows(): Promise<void> {
       nodeIntegration: false,
       nodeIntegrationInSubFrames: false,
       nodeIntegrationInWorker: false,
-      preload: PREFS_WINDOW_PRELOAD_WEBPACK_ENTRY,
+      preload: path.join(__dirname, '../renderers/shared/preload.js'),
     },
   })
 
@@ -92,7 +92,7 @@ async function createWindows(): Promise<void> {
       nodeIntegration: false,
       nodeIntegrationInSubFrames: false,
       nodeIntegrationInWorker: false,
-      preload: PICKER_WINDOW_PRELOAD_WEBPACK_ENTRY,
+      preload: path.join(__dirname, '../renderers/shared/preload.js'),
     },
     width: 250,
   })
@@ -120,10 +120,28 @@ async function createWindows(): Promise<void> {
     pickerWindow?.hide()
   })
 
-  await Promise.all([
-    prefsWindow.loadURL(PREFS_WINDOW_WEBPACK_ENTRY),
-    pickerWindow.loadURL(PICKER_WINDOW_WEBPACK_ENTRY),
-  ])
+  // and load the index.html of the app.
+  if (PICKER_WINDOW_VITE_DEV_SERVER_URL) {
+    await Promise.all([
+      prefsWindow.loadURL(PREFS_WINDOW_VITE_DEV_SERVER_URL),
+      pickerWindow.loadURL(PICKER_WINDOW_VITE_DEV_SERVER_URL),
+    ])
+  } else {
+    await Promise.all([
+      prefsWindow.loadFile(
+        path.join(
+          __dirname,
+          `../renderer/${PREFS_WINDOW_VITE_NAME}/index.html`,
+        ),
+      ),
+      pickerWindow.loadFile(
+        path.join(
+          __dirname,
+          `../renderer/${PICKER_WINDOW_VITE_NAME}/index.html`,
+        ),
+      ),
+    ])
+  }
 }
 
 function showPickerWindow(): void {
